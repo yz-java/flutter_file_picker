@@ -179,6 +179,52 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
     });
   }
 
+  void _pickDirectoryPaths() async {
+    List<String>? pickedDirectories;
+    bool hasUserAborted = true;
+    _resetState();
+
+    try {
+      pickedDirectories = await FilePicker.pickDirectoryPaths(
+        dialogTitle: _dialogTitleController.text,
+        initialDirectory: _initialDirectoryController.text,
+        allowMultiple: _multiPick,
+        lockParentWindow: _lockParentWindow,
+      );
+      hasUserAborted = pickedDirectories == null;
+    } on PlatformException catch (e) {
+      _logException('Unsupported operation: $e');
+    } catch (e) {
+      _logException(e.toString());
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+      _userAborted = hasUserAborted;
+      _resultsWidget = FilePickerResultsList(
+        itemCount: pickedDirectories?.length ?? 0,
+        itemBuilder: (BuildContext context, int index) {
+          String name = 'File path:';
+          if (!kIsWeb) {
+            final fs = LocalFileSystem();
+            name = fs.isFileSync(pickedDirectories![index])
+                ? 'File path:'
+                : 'Directory path:';
+          }
+          return ListTile(
+            leading: Text(
+              index.toString(),
+              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+            ),
+            title: Text(name),
+            subtitle: Text(pickedDirectories![index]),
+          );
+        },
+      );
+    });
+  }
+
   void _clearCachedFiles() async {
     pickedFiles = [];
     _resetState();
@@ -206,6 +252,10 @@ class _FilePickerDemoState extends State<FilePickerDemo> {
   }
 
   void _selectFolder() async {
+    if(_multiPick){
+      _pickDirectoryPaths();
+      return;
+    }
     String? pickedDirectoryPath;
     bool hasUserAborted = true;
     _resetState();

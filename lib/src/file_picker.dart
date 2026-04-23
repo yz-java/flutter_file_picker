@@ -240,4 +240,18 @@ abstract final class FilePicker {
   static Future<void> skipEntitlementsChecks() {
     return FilePickerPlatform.instance.skipEntitlementsChecks();
   }
+
+  static Future<List<String>?> pickDirectoryPaths({
+    String? dialogTitle,
+    String? initialDirectory,
+    bool allowMultiple = false,
+    bool lockParentWindow = false,
+  }) {
+    return FilePickerPlatform.instance.pickDirectoryPaths(
+      dialogTitle: dialogTitle,
+      initialDirectory: initialDirectory,
+      allowMultiple: allowMultiple,
+      lockParentWindow: lockParentWindow,
+    );
+  }
 }
